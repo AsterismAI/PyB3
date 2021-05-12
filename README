@@ -1,0 +1,9 @@
+# B3 parser and outputter
+
+Kerry N. Wood (kerry.wood@jhuapl.edu)
+
+May 12, 2021
+
+This was modified from code in the `asctypes` and the `estm` code set.  It was tested by using the AstroStandards code to parse / output data and then re-generate with the Python code.
+- look at the `estm/kerry/OBS/Obs.ipynb` for some of the initial code
+- CarMHF also has a rudimentary B3 parser (look in the ObsInterface)
