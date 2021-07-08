@@ -87,7 +87,10 @@ def makeRange( rangeval ):
     '''
     exp = int(np.log10( rangeval ))
     expval = exp-1  # this is the exponent mapping (valid ranges are 99.99999 to 9,999,999, so 0=10^1)
-    if expval < 0 or expval > 5: raise
+    #if expval < 0 or expval > 5: 
+    # KNW : changed to 9 because of one outlier
+    if expval < 0 or expval > 9: 
+        raise Exception('cannot set exponent, value is {} -- range {}'.format( expval,rangeval ) )
     return str(rangeval).replace('.','').ljust(7,'0')[0:7], str(expval)
 
 def fortran9p3( flt ): 
@@ -98,7 +101,7 @@ def fortran9p3( flt ):
     else : neg = False
     l,r = str(np.abs(flt)).split('.')
     l = l[-6:].rjust(6,'0')
-    r = r[-3:].ljust(3,'0')
+    r = r[:3].ljust(3,'0')
     if neg : return '-' + l[1:] + r
     return '+' + l[1:] + r
 
