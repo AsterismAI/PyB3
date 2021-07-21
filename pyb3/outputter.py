@@ -49,12 +49,10 @@ def B3_float_field( val, left, right ):
     else: neg = False
     val = np.round( np.abs(val), right )
     #l,r = str(np.abs(val)).split('.')
-    #l,r = '{:.20f}'.format( np.abs(val) ).split('.')
     # KNW: fixed thanks to SJH on 2021/07/20
-    l = int(val)
-    r = val - l
-    l = str(l)[-left:].rjust(left,'0')
-    r = str(r)[:right].ljust(right,'0')
+    l,r = '{:.20f}'.format( np.abs(val) ).split('.')
+    l = l[-left:].rjust(left,'0')
+    r = r[:right].ljust(right,'0')
     if not neg: return l + r
     if l[0] == '0' : return '-' + l[1:] + r
     if l[0] == '1' : return 'J' + l[1:] + r
