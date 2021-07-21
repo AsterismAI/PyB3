@@ -10,9 +10,22 @@ import numpy as np
 
 # ----------------------------------------- EPOCH -----------------------------------------
 ds50epoch = astropy.time.Time( datetime.strptime( '1949-12-31T00:00:00', "%Y-%m-%dT%H:%M:%S") )
+ds50dt    = ds50epoch.datetime
+
+# ----------------------------------------- EQUINOX -----------------------------------------
+# must be strings, since we just mash them in
+class EqVals:
+    TEME  = '0'
+    MEME  = '1'
+    J2K   = '2'
+    B1950 = '3'
+Equinox = EqVals
+# ----------------------------------------- EQUINOX -----------------------------------------
 
 def ds50ToATime( flt ):
+    #try: return ds50dt + timedelta( days=flt )
     try: return astropy.time.Time( ds50epoch.jd + flt , format='jd' )
+    #try: return ds50epoch + (u.day * flt )
     except Exception as e: 
         print('ds50ToATime: cannot parse input: {}'.format(str(e)))
         return None
@@ -23,6 +36,7 @@ def ds50ToDateTime( flt ):
      "YYDDDHHMMSS.SSS"
      '''
     return ds50ToATime( flt ).datetime
+    #return ds50ToATime( flt )
 
 
 def B3_float_field( val, left, right ):
@@ -33,9 +47,14 @@ def B3_float_field( val, left, right ):
     '''
     if val < 0: neg = True
     else: neg = False
-    l,r = str(np.abs(val)).split('.')
-    l = l[-left:].rjust(left,'0')
-    r = r[:right].ljust(right,'0')
+    val = np.round( np.abs(val), right )
+    #l,r = str(np.abs(val)).split('.')
+    #l,r = '{:.20f}'.format( np.abs(val) ).split('.')
+    # KNW: fixed thanks to SJH on 2021/07/20
+    l = int(val)
+    r = val - l
+    l = str(l)[-left:].rjust(left,'0')
+    r = str(r)[:right].ljust(right,'0')
     if not neg: return l + r
     if l[0] == '0' : return '-' + l[1:] + r
     if l[0] == '1' : return 'J' + l[1:] + r
@@ -51,7 +70,7 @@ def B3_float_field( val, left, right ):
 def makeDate( datetm ): return datetm.strftime('%y%j%H%M%S%f')[:14]
 
 def makeCommon( obdata, datetm=None, classification='U' ):
-    ts      = list(' '*76)  # init the string
+    ts      = list(' '*75)  # init the string (without epoch setting // will add later)
     ts[0]   = 'U'
     ts[1:6] = '{:05d}'.format( int(obdata['XA_OBS_SATNUM'] ) )
     ts[6:9] = '{:03d}'.format( int(obdata['XA_OBS_SENNUM'] ) )
@@ -105,17 +124,13 @@ def fortran9p3( flt ):
     if neg : return '-' + l[1:] + r
     return '+' + l[1:] + r
 
-
-# In[4]:
-
-
 # ------------------------------------  TYPE 1 ---------------------------------------
 def maketype1( obdata, datetm=None ):
     ts = makeCommon( obdata, datetm=datetm )
     ts[23:29] = makeEl( obdata['XA_OBS_ELORDEC'])
     ts[30:37] = B3_float_field( obdata['XA_OBS_AZORRA'], 3,4)
     ts[74] = '1'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
 # ------------------------------------  TYPE 2 ---------------------------------------
@@ -132,7 +147,7 @@ def maketype2( data, datetm=None ):
     ts[38:45] = rgval
     ts[45]    = rgexp
     ts[74] = '2'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
 
@@ -151,7 +166,7 @@ def maketype3( data, datetm=None ):
     ts[45]    = rgexp
     ts[47:54] = B3_float_field( data['XA_OBS_RANGERATE'],2,5)  
     ts[74] = '3'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
 # ------------------------------------  TYPE 4 ---------------------------------------
@@ -172,7 +187,7 @@ def maketype4( data, datetm=None ):
     ts[61:66] = B3_float_field( data['XA_OBS_AZRATE'],1,4) 
     ts[67:72] = B3_float_field( data['XA_OBS_RANGEACCEL'],1,4)
     ts[74] = '4'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
 # ------------------------------------  TYPE 5 ---------------------------------------
@@ -181,7 +196,7 @@ def maketype5( data, datetm=None ):
     ts[23:29] = B3_float_field( data['XA_OBS_ELORDEC'], 2, 4)
     ts[30:37] = makeRA( data['XA_OBS_AZORRA'])
     ts[74] = '5'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
 # ------------------------------------  TYPE 6 ---------------------------------------
@@ -191,7 +206,7 @@ def maketype6( data, datetm=None ):
     ts[38:45] = rgval
     ts[45]    = rgexp
     ts[74] = '6'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
 # ------------------------------------  TYPE 9 ---------------------------------------
@@ -204,23 +219,26 @@ def maketype9( data, datetm=None ):
     ts[55:64] = fortran9p3( data['XA_OBS_POSY'] ) 
     ts[64:73] = fortran9p3( data['XA_OBS_POSZ'] ) 
     ts[74] = '9'
-    ts[75] = '0'
+    #ts[75] = '0'
     return ''.join(ts)
 
-def b3_dispatcher( data ):
-    if data['XA_OBS_OBSTYPE'] == 1: return maketype1( data  )
-    if data['XA_OBS_OBSTYPE'] == 2: return maketype2( data  )
-    if data['XA_OBS_OBSTYPE'] == 3: return maketype3( data  )
-    if data['XA_OBS_OBSTYPE'] == 4: return maketype4( data  )
-    if data['XA_OBS_OBSTYPE'] == 5: return maketype5( data  )
-    if data['XA_OBS_OBSTYPE'] == 6: return maketype6( data  )
-    if data['XA_OBS_OBSTYPE'] == 9: return maketype9( data  )
+# ------------------------------------ dispatcher ------------------------------------
+def b3_dispatcher( data, datetm=None, equinox=Equinox.TEME ):
+    assert len(equinox) == 1
+    if data['XA_OBS_OBSTYPE'] == 1: return maketype1( data, datetm=datetm ) + equinox
+    if data['XA_OBS_OBSTYPE'] == 2: return maketype2( data, datetm=datetm ) + equinox
+    if data['XA_OBS_OBSTYPE'] == 3: return maketype3( data, datetm=datetm ) + equinox
+    if data['XA_OBS_OBSTYPE'] == 4: return maketype4( data, datetm=datetm ) + equinox
+    if data['XA_OBS_OBSTYPE'] == 5: return maketype5( data, datetm=datetm ) + equinox
+    if data['XA_OBS_OBSTYPE'] == 6: return maketype6( data, datetm=datetm ) + equinox
+    if data['XA_OBS_OBSTYPE'] == 9: return maketype9( data, datetm=datetm ) + equinox
 
 
+#=====================================================================================
 if __name__ == "__main__":
     Q = B3s[0].toAstrostdDict()
-    b3_dispatcher(Q)
+    b3_dispatcher(Q, equinox=Equinox.J2K)
 
     for B in B3s:
         print(B.origline)
-        print( b3_dispatcher( B.toAstrostdDict() ) )
+        print( b3_dispatcher( B.toAstrostdDict() ,equinox=Equinox.J2K ) )
