@@ -25,7 +25,7 @@
 import astropy.time
 import json
 from datetime import datetime
-from . import outputter
+import outputter
 
 
 # ----------------------------------------- EPOCH -----------------------------------------
@@ -135,6 +135,13 @@ class B3:
         try: self.rangeacc = float( L[67:72] ) / 10000 
         except: self.rangeacc = self.default
 
+        self.equinox = None
+        if L[75] == ' ' or L[75] == '0' : self.equinox = 'TEME'
+        if L[75] == '1' : self.equinox = 'YEAR'
+        if L[75] == '2' : self.equinox = 'J2K'
+        if L[75] == '3' : self.equinox = '1950'
+
+
         try: self.track_position = int( L[76] )
         except: self.track_position = None
 
@@ -169,6 +176,7 @@ class B3:
               'elrate'  : self.elrate,
               'azrate'  : self.azrate,
               'rangeacc' : self.rangeacc,
+              'equinox' : self.equinox,
               'site_tag' : self.site_tag,
               'spadoc_tag' : self.spadoc_tag,
               'track_position' : self.track_position
