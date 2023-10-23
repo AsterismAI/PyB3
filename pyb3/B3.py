@@ -136,10 +136,10 @@ class B3:
         except: self.rangeacc = self.default
 
         self.equinox = None
-        if L[75] == ' ' or L[75] == '0' : self.equinox = 'TEME'
-        if L[75] == '1' : self.equinox = 'YEAR'
-        if L[75] == '2' : self.equinox = 'J2K'
-        if L[75] == '3' : self.equinox = '1950'
+        if L[75] == ' ' or L[75] == '0' : self.equinox = outputter.Equinox.TEME
+        if L[75] == '1' : self.equinox = outputter.Equinox.MEME
+        if L[75] == '2' : self.equinox = outputter.Equinox.J2K
+        if L[75] == '3' : self.equinox = outputter.Equinox.B1950
 
 
         try: self.track_position = int( L[76] )
