@@ -25,7 +25,7 @@
 import astropy.time
 import json
 from datetime import datetime
-import outputter
+from .outputter import Equinox
 
 
 # ----------------------------------------- EPOCH -----------------------------------------
@@ -136,10 +136,10 @@ class B3:
         except: self.rangeacc = self.default
 
         self.equinox = None
-        if L[75] == ' ' or L[75] == '0' : self.equinox = outputter.Equinox.TEME
-        if L[75] == '1' : self.equinox = outputter.Equinox.MEME
-        if L[75] == '2' : self.equinox = outputter.Equinox.J2K
-        if L[75] == '3' : self.equinox = outputter.Equinox.B1950
+        if L[75] == ' ' or L[75] == '0' : self.equinox = Equinox.TEME
+        if L[75] == '1' : self.equinox = Equinox.MEME
+        if L[75] == '2' : self.equinox = Equinox.J2K
+        if L[75] == '3' : self.equinox = Equinox.B1950
 
 
         try: self.track_position = int( L[76] )
