@@ -150,7 +150,7 @@ class B3:
         except: self.astat = None
 
         # sometimes the sensor applies a different satellite number
-        try: self.site_tag    = int(L[80:84])
+        try: self.site_tag    = int(L[80:85])
         except: self.site_tag = None
 
         # SPADOC applied tag number
