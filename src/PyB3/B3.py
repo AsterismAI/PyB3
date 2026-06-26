@@ -190,10 +190,10 @@ class B3:
         rv = {}
         for v in as_fields: rv[v] = 0.0
         rv['XA_OBS_SECCLASS'] = classmap[ self.classification ]
-        rv['XA_OBS_DS50UTC'] = astropy.time.Time( self.datetime ).jd - self.jd1950
-        rv['XA_OBS_SATNUM']  = self.satid
-        rv['XA_OBS_OBSTYPE'] = self.obstype
-        rv['XA_OBS_SENNUM']  = self.sensid
+        rv['XA_OBS_DS50UTC']  = astropy.time.Time( self.datetime ).jd - self.jd1950
+        rv['XA_OBS_SATNUM']   = self.satid
+        rv['XA_OBS_OBSTYPE']  = self.obstype
+        rv['XA_OBS_SENNUM']   = self.sensid
         if self.obstype in set([1,2,3,4,5,8,9]): rv['XA_OBS_ELORDEC'] = self.eledec
         if self.obstype in set([1,2,3,4,5,8,9] ): rv['XA_OBS_AZORRA'] = self.azra
         if self.obstype in set([2,3,4,6]) : rv['XA_OBS_RANGE'] = self.range
@@ -205,12 +205,12 @@ class B3:
             rv['XA_OBS_POSX'] = self.ecfx
             rv['XA_OBS_POSY'] = self.ecfy
             rv['XA_OBS_POSZ'] = self.ecfz
-        if self.site_tag :        rv['XA_OBS_SITETAG'] = self.site_tag
-        if self.spadoc_tag :      rv['XA_OBS_SPADOCTAG'] = self.spadoc_tag
-        if self.track_position:   rv['XA_OBS_TRACKIND'] = self.track_position
-        if self.astat:            rv['XA_OBS_ASTAT'] = self.astat
+        if self.site_tag :      rv['XA_OBS_SITETAG'] = self.site_tag
+        if self.spadoc_tag :    rv['XA_OBS_SPADOCTAG'] = self.spadoc_tag
+        if self.track_position: rv['XA_OBS_TRACKIND'] = self.track_position
+        if self.astat:          rv['XA_OBS_ASTAT'] = self.astat
+        rv['XA_OBS_YROFEQNX'] = self.equinox
         # astrostandards does everything in TEME, but we will support multiple frames
-        rv['_equinox']      = self.equinox
         return rv
 
     def __repr__( self ): 

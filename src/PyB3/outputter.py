@@ -73,7 +73,7 @@ def B3_float_field( val, left, right ):
     val = np.round( np.abs(val), right )
     #l,r = str(np.abs(val)).split('.')
     # KNW: fixed thanks to SJH on 2021/07/20
-    l,r = '{:.20f}'.format( np.abs(val) ).split('.')
+    l,r = '{:.4f}'.format( np.abs(val) ).split('.')
     l = l[-left:].rjust(left,'0')
     r = r[:right].ljust(right,'0')
     if not neg: return l + r
@@ -111,15 +111,29 @@ def makeRA( dec ):
     Each minute of time is 15∘/60=15′, i.e. 15 arcminutes. 
     Each second of time is 15′/60=15′′, i.e. 15 arcseconds.
     '''
-    dec = (dec + 360) % 360  # lock it to [0,360] and the values below should not overflow
-    hours  = int( dec / 15 )
-    frac   = dec - (15 * hours)
-    minut  = int( frac / 0.25 )
-    frac -= 0.25 * minut 
-    secs   =  frac * 86400./360.
-    secsS  = '{:04.1f}'.format( secs ).replace('.','')
-    frac -= secs * 0.25/60
-    return "{:02d}{:02d}{}".format( hours, minut, secsS )
+    decimal_hours= dec * (24./360.)
+    # Isolate whole hours and the decimal remainder
+    hours, remainder = divmod(decimal_hours, 1)
+    # Convert remainder to minutes and isolate whole minutes
+    minutes, remainder = divmod(remainder * 60, 1)
+    # Convert remainder to seconds
+    seconds = remainder * 60
+    # Format to HH:MM:SS (rounding seconds to 2 decimal places)
+    return f"{int(hours):02d}{int(minutes):02d}{seconds:04.1f}".replace('.','')
+
+    # -----------------------------------------------------------------------------------------------------
+    # OLD version
+    # KNW: 2026/06/26 improperly rounded last digit(s)
+    #dec = (dec + 360) % 360  # lock it to [0,360] and the values below should not overflow
+    #hours  = int( dec / 15 )
+    #frac   = dec - (15 * hours)
+    #minut  = int( frac / 0.25 )
+    #frac -= 0.25 * minut 
+    #secs   =  frac * 86400./360.
+    #secsS  = '{:04.1f}'.format( secs ).replace('.','')
+    #frac -= secs * 0.25/60
+    #return "{:02d}{:02d}{}".format( hours, minut, secsS )
+    # -----------------------------------------------------------------------------------------------------
 
 def makeRange( rangeval ):
     '''
@@ -245,8 +259,8 @@ def maketype9( data, datetm=None ):
 
 # -----------------------------------------------------------------------------------------------------
 def get_equinox( data ):
-    assert data['_equinox'] >=0 and data['_equinox'] <= 3
-    return '{:01d}'.format( data['_equinox'] )[0]
+    assert data['XA_OBS_YROFEQNX'] >=0 and data['XA_OBS_YROFEQNX'] <= 3
+    return '{:01d}'.format( data['XA_OBS_YROFEQNX'] )[0]
 
 # -----------------------------------------------------------------------------------------------------
 def make_suffix( data ):
@@ -279,7 +293,7 @@ def b3_dispatcher( data, datetm=None ):
 #=====================================================================================
 if __name__ == "__main__":
     Q = B3s[0].toAstrostdDict()
-    b3_dispatcher(Q, equinox=Equinox.J2K)
+    b3_dispatcher(Q)
 
     for B in B3s:
         print(B.origline)
