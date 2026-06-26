@@ -1,10 +1,20 @@
 # B3 parser and outputter
 
-Kerry N. Wood (kerry.wood@jhuapl.edu)
+Kerry N. Wood (kerry.wood@asterism.ai)
 
 April 2023
 
+*Updated June 2026*
+
 This is Python-only code to parse and generate B3 formats for obs.
+
+It does *not* do any coordinate conversions or internal processing.  
+
+You have to do that outside the parser and serializer.
+
+This parser should handle most versions of B3 
+
+### Testing
 
 A test set was generated via the AstroStandards and this is tested against it.
 
