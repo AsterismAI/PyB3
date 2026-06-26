@@ -106,7 +106,9 @@ class B3:
         self.azra = 0.
         if self.obstype in set([1,2,3,4,8]): self.azra = float( L[30:37] ) / 10000
         if self.obstype in set([5,9]): 
-            self.azra = float(L[30:32]) + float(L[32:34])/60. + float(L[34:37])/3600
+            # NOTE: decimal point is implied between columns 36,37.. these are actually fractional seconds!
+            # divide the seconds by 36000 instead of 3600 to account for this
+            self.azra = float(L[30:32]) + float(L[32:34])/60. + float(L[34:37])/36000.
             self.azra *= 360./24.
 
         try: self.rgexp = float( L[45] )
